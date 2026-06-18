@@ -3,9 +3,9 @@ package com.example.vcs_project15.presentation.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 
-import com.example.vcs_project15.BuildConfig
 import com.example.vcs_project15.data.remote.api.SearchApi
 import com.example.vcs_project15.domain.model.SearchImage
+import com.example.vcs_project15.BuildConfig
 
 class SearchPagingSource(
     private val searchApi: SearchApi,
@@ -51,6 +51,10 @@ class SearchPagingSource(
     override fun getRefreshKey(
         state: PagingState<Int, SearchImage>
     ): Int? {
-        return state.anchorPosition
+        return state.anchorPosition?.let { position ->
+            state.closestPageToPosition(position)
+                ?.nextKey
+                ?.minus(10)
+        }
     }
 }

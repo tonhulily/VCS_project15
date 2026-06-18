@@ -21,7 +21,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
+import com.example.vcs_project15.presentation.component.SearchImageCard
 import com.example.vcs_project15.utils.ImageUtils
 
 @OptIn(ExperimentalMaterial3Api::class)

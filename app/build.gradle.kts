@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.File
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -6,32 +9,39 @@ plugins {
     kotlin("kapt")
 }
 
+val localProperties = Properties()
+val localPropertiesFile: File = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+
 android {
     namespace = "com.example.vcs_project15"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.vcs_project15"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
         buildConfigField(
             "String",
             "VISION_API_KEY",
-            "\"${project.findProperty("VISION_API_KEY")}\""
+            "\"${localProperties.getProperty("VISION_API_KEY", "")}\""
         )
         buildConfigField(
             "String",
             "SEARCH_API_KEY",
-            "\"${project.findProperty("SEARCH_API_KEY")}\""
+            "\"${localProperties.getProperty("SEARCH_API_KEY", "")}\""
         )
         buildConfigField(
             "String",
             "SEARCH_ENGINE_ID",
-            "\"${project.findProperty("SEARCH_ENGINE_ID")}\""
+            "\"${localProperties.getProperty("SEARCH_ENGINE_ID", "")}\""
         )
     }
 
@@ -68,22 +78,25 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.foundation)
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
     implementation(libs.paging)
+    implementation(libs.paging.compose)
     implementation(libs.coil.compose)
     implementation(libs.coroutines)
     implementation(libs.hilt.android)
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation(libs.androidx.compose.foundation)
     kapt(libs.hilt.compiler)
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    
     implementation(libs.camerax.camera2)
     implementation(libs.camerax.lifecycle)
     implementation(libs.camerax.view)
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.compose.material:material-icons-extended")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
