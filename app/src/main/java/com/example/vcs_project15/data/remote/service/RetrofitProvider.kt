@@ -10,8 +10,12 @@ object RetrofitProvider {
         client: OkHttpClient
     ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(baseUrl)
-            .client(client)
+            .baseUrl(
+                baseUrl
+            )
+            .client(
+                client
+            )
             .addConverterFactory(
                 GsonConverterFactory.create()
             )

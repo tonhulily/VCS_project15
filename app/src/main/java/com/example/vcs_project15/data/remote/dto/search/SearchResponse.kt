@@ -1,12 +1,12 @@
 package com.example.vcs_project15.data.remote.dto.search
 data class SearchResponse(
-    val items: List<SearchItemDto>?
+    val items: List<SearchItem>?
 )
-data class SearchItemDto(
+data class SearchItem(
     val title: String?,
     val link: String?,
-    val image: SearchImageDto?
+    val image: SearchImageInfo?
 )
-data class SearchImageDto(
+data class SearchImageInfo(
     val thumbnailLink: String?
 )

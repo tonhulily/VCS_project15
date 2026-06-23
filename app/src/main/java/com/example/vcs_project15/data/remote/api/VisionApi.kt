@@ -8,7 +8,7 @@ import retrofit2.http.Query
 
 interface VisionApi {
     @POST("v1/images:annotate")
-    suspend fun detectLabels(
+    suspend fun detectWeb(
         @Body request: VisionRequest,
         @Query("key")
         apiKey: String

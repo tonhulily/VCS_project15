@@ -2,10 +2,9 @@ package com.example.vcs_project15.presentation.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-
+import com.example.vcs_project15.BuildConfig
 import com.example.vcs_project15.data.remote.api.SearchApi
 import com.example.vcs_project15.domain.model.SearchImage
-import com.example.vcs_project15.BuildConfig
 
 class SearchPagingSource(
     private val searchApi: SearchApi,
@@ -16,45 +15,60 @@ class SearchPagingSource(
     ): LoadResult<Int, SearchImage> {
         return try {
             val start = params.key ?: 1
-
+            android.util.Log.e(
+                "SEARCH_DEBUG",
+                """
+            keyword=$keyword
+            start=$start
+            apiKey=${BuildConfig.SEARCH_API_KEY}
+            cx=${BuildConfig.SEARCH_ENGINE_ID}
+            """.trimIndent()
+            )
             val response =
                 searchApi.searchImages(
                     apiKey = BuildConfig.SEARCH_API_KEY,
                     searchEngineId = BuildConfig.SEARCH_ENGINE_ID,
                     query = keyword,
-                    start = start
+                    start = 1
                 )
-            val items =
+            val images =
                 response.items
                     ?.map {
                         SearchImage(
-                            title = it.title ?: "",
-                            imageUrl = it.link ?: "",
+                            title = it.title.orEmpty(),
+                            imageUrl = it.link.orEmpty(),
                             thumbnailUrl =
-                                it.image
-                                    ?.thumbnailLink
-                                    ?: ""
+                                it.image?.thumbnailLink.orEmpty()
                         )
                     }
                     ?: emptyList()
             LoadResult.Page(
-                data = items,
-                prevKey = null,
+                data = images,
+                prevKey =
+                    if (start == 1) null
+                    else start - 10,
                 nextKey =
-                    if (items.isEmpty()) null
+                    if (images.isEmpty()) null
                     else start + 10
             )
         } catch (e: Exception) {
+            android.util.Log.e(
+                "SEARCH_ERROR",
+                e.stackTraceToString()
+            )
             LoadResult.Error(e)
         }
     }
     override fun getRefreshKey(
         state: PagingState<Int, SearchImage>
     ): Int? {
-        return state.anchorPosition?.let { position ->
-            state.closestPageToPosition(position)
-                ?.nextKey
-                ?.minus(10)
-        }
+        return state.anchorPosition
+            ?.let { position ->
+                state.closestPageToPosition(
+                    position
+                )
+                    ?.prevKey
+                    ?.plus(10)
+            }
     }
 }
