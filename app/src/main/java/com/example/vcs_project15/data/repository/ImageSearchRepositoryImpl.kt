@@ -2,8 +2,7 @@ package com.example.vcs_project15.data.repository
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import com.example.vcs_project15.BuildConfig
-import com.example.vcs_project15.data.remote.api.SearchApi
+import com.example.vcs_project15.data.remote.api.PexelsApi
 import com.example.vcs_project15.data.remote.api.VisionApi
 import com.example.vcs_project15.data.remote.dto.vision.Feature
 import com.example.vcs_project15.data.remote.dto.vision.Image
@@ -13,11 +12,12 @@ import com.example.vcs_project15.domain.model.WebDetectionResult
 import com.example.vcs_project15.domain.repository.ImageSearchRepository
 import com.example.vcs_project15.presentation.paging.SearchPagingSource
 import javax.inject.Inject
+import com.example.vcs_project15.BuildConfig
 
 class ImageSearchRepositoryImpl
 @Inject constructor(
     private val visionApi: VisionApi,
-    private val searchApi: SearchApi
+    private val pexelsApi: PexelsApi
 ) : ImageSearchRepository {
     override suspend fun detectWeb(
         imageBase64: String
@@ -33,8 +33,8 @@ class ImageSearchRepositoryImpl
                         features =
                             listOf(
                                 Feature(
-                                    type =
-                                        "WEB_DETECTION"
+                                    type = "LABEL_DETECTION",
+                                    maxResults = 5
                                 )
                             )
                     )
@@ -45,23 +45,31 @@ class ImageSearchRepositoryImpl
                 request,
                 BuildConfig.VISION_API_KEY
             )
-        val webDetection =
+        val labels =
             response.responses
                 .firstOrNull()
-                ?.webDetection
+                ?.labelAnnotations
+                ?: emptyList()
+        val ignoredLabels =
+            setOf(
+                "Box",
+                "Product",
+                "Packaging",
+                "Rectangle"
+            )
         val query =
-            webDetection
-                ?.bestGuessLabels
-                ?.firstOrNull()
-                ?.label
-                ?: ""
-        val entities =
-            webDetection
-                ?.webEntities
-                ?.mapNotNull {
+            labels
+                .filter {
+                    it.description !in ignoredLabels
+                }
+                .take(3)
+                .joinToString(" ") {
                     it.description
                 }
-                ?: emptyList()
+        val entities =
+            labels.map {
+                it.description
+            }
         return WebDetectionResult(
             query = query,
             entities = entities
@@ -77,7 +85,7 @@ class ImageSearchRepositoryImpl
                 ),
             pagingSourceFactory = {
                 SearchPagingSource(
-                    searchApi,
+                    pexelsApi,
                     keyword
                 )
             }

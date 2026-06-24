@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -35,9 +36,7 @@ import com.example.vcs_project15.presentation.component.QueryCard
 import com.example.vcs_project15.presentation.component.SearchImageCard
 import com.example.vcs_project15.utils.ImageUtils
 
-@OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     openCamera: () -> Unit,
@@ -49,9 +48,7 @@ fun HomeScreen(
     val images = viewModel.images.collectAsLazyPagingItems()
     val galleryLauncher =
         rememberLauncherForActivityResult(
-            contract =
-                ActivityResultContracts
-                    .PickVisualMedia()
+            contract = ActivityResultContracts.PickVisualMedia()
         ) { uri ->
             uri ?: return@rememberLauncherForActivityResult
             val base64 =
@@ -108,8 +105,10 @@ fun HomeScreen(
                     .fillMaxSize()
                     .padding(padding)
                     .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement =
+                Arrangement.spacedBy(12.dp),
+            horizontalArrangement =
+                Arrangement.spacedBy(12.dp)
         ) {
             item(
                 span = {
@@ -141,17 +140,39 @@ fun HomeScreen(
                     }
                 )
             }
-            state.searchQuery
-                ?.let {
-                    item(
-                        span = {
-                            GridItemSpan(2)
-                        }
-                    ) {
-                        QueryCard(it)
+            state.searchQuery?.let { query ->
+                item(
+                    span = {
+                        GridItemSpan(2)
                     }
+                ) {
+                    QueryCard(
+                        query
+                    )
                 }
-            if (images.loadState.refresh is LoadState.Loading) {
+            }
+            if (state.labels.isNotEmpty()) {
+                item(
+                    span = {
+                        GridItemSpan(2)
+                    }
+                ) {
+                    Text(
+                        text = "Detected Labels"
+                    )
+                }
+                items(
+                    state.labels
+                ) { label ->
+                    QueryCard(
+                        label
+                    )
+                }
+            }
+            if (
+                images.loadState.refresh
+                        is LoadState.Loading
+            ) {
                 item(
                     span = {
                         GridItemSpan(2)
@@ -160,8 +181,33 @@ fun HomeScreen(
                     LoadingState()
                 }
             }
+
+            if (images.loadState.refresh is LoadState.Error) {
+                val error = images.loadState.refresh as LoadState.Error
+                item(
+                    span = {
+                        GridItemSpan(2)
+                    }
+                ) {
+                    ErrorState(
+                        message = error.error.message ?: "Unknown",
+                        onRetry = { images.retry()
+                        }
+                    )
+                }
+            }
+            items(
+                count = images.itemCount
+            ) { index ->
+                val image = images[index]
+                if (image != null) {
+                    SearchImageCard(
+                        item = image
+                    )
+                }
+            }
             when (
-                val state = images.loadState.append
+                val appendState = images.loadState.append
             ) {
                 is LoadState.Loading -> {
                     item(
@@ -179,7 +225,11 @@ fun HomeScreen(
                         }
                     ) {
                         ErrorState(
-                            message = state.error.message ?: "Unknown",
+                            message =
+                                appendState
+                                    .error
+                                    .message
+                                    ?: "Unknown",
                             onRetry = {
                                 images.retry()
                             }

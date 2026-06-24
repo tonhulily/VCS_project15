@@ -18,7 +18,7 @@ object ImageUtils {
             )
         val outputStream = ByteArrayOutputStream()
         bitmap.compress(
-            Bitmap.CompressFormat.JPEG,
+            Bitmap.CompressFormat.PNG,
             85,
             outputStream
         )

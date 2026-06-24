@@ -1,8 +1,7 @@
 package com.example.vcs_project15.di
 
-import com.example.vcs_project15.data.remote.api.SearchApi
+import com.example.vcs_project15.data.remote.api.PexelsApi
 import com.example.vcs_project15.data.remote.api.VisionApi
-import com.example.vcs_project15.data.remote.interceptor.ApiKeyInterceptor
 import com.example.vcs_project15.data.remote.interceptor.LoggingInterceptor
 import com.example.vcs_project15.data.remote.interceptor.RetryInterceptor
 import com.example.vcs_project15.data.remote.service.RetrofitProvider
@@ -46,16 +45,16 @@ object NetworkModule {
     }
     @Provides
     @Singleton
-    fun provideSearchApi(
+    fun providePexelsApi(
         client: OkHttpClient
-    ): SearchApi {
+    ): PexelsApi {
         return RetrofitProvider
             .create(
-                Constants.SEARCH_BASE_URL,
+                Constants.PEXELS_BASE_URL,
                 client
             )
             .create(
-                SearchApi::class.java
+                PexelsApi::class.java
             )
     }
 }

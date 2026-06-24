@@ -71,7 +71,8 @@ class HomeViewModel
                 _state.update {
                     it.copy(
                         loading = false,
-                        searchQuery = result.query
+                        searchQuery = result.query,
+                        labels = result.entities
                     )
                 }
                 queryFlow.value = result.query

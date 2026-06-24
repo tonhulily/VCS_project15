@@ -43,6 +43,11 @@ android {
             "SEARCH_ENGINE_ID",
             "\"${localProperties.getProperty("SEARCH_ENGINE_ID", "")}\""
         )
+        buildConfigField(
+            "String",
+            "PEXELS_API_KEY",
+            "\"${localProperties["PEXELS_API_KEY"]}\""
+        )
     }
 
     buildTypes {
